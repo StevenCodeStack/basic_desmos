@@ -5,13 +5,15 @@
  */
 import * as math from "mathjs";
 
-import { Plot, Point } from "mafs";
+import { Circle, Plot, Point } from "mafs";
 import { EquationValueType } from "@/types";
 import { InlineMath } from "react-katex";
+// Replace your current regex with this:
+const circlePattern = /\([xy][^)]+\)\^2\s*\+\s*\([xy][^)]+\)\^2\s*=\s*\d+/;
 
 export function stringToGraph(equationData: EquationValueType) {
-  const equation = equationData.equation.trim().replace(" ", "");
-  if (equation.startsWith("x")) {
+  const equation = equationData.equation.replace(/\s/g, "");
+  if (equation.startsWith("x=")) {
     const expr = equation.replace(/^x\s*=\s*/, "").trim();
     const compiled = math.compile(expr);
     return (
@@ -22,7 +24,7 @@ export function stringToGraph(equationData: EquationValueType) {
       />
     );
   }
-  if (equation.startsWith("y")) {
+  if (equation.startsWith("y=")) {
     const expr = equation.replace(/^y\s*=\s*/, "").trim();
     const compiled = math.compile(expr);
     return (
@@ -33,10 +35,53 @@ export function stringToGraph(equationData: EquationValueType) {
       />
     );
   }
+  if (equation.match(circlePattern)) {
+    const [left, right] = equation.split("=");
+    const radiusSquared = parseFloat(right.trim());
+
+    if (isNaN(radiusSquared) || radiusSquared <= 0) return null;
+
+    const terms = left.split(/\+(?=\()/);
+    const xTerm = terms.find((term) => term.includes("x"));
+    const yTerm = terms.find((term) => term.includes("y"));
+
+    const xMatch = xTerm?.match(/\(x([^)]+)\)\^2/);
+    const yMatch = yTerm?.match(/\(y([^)]+)\)\^2/);
+
+    const x = xMatch ? xMatch[1] : null;
+    const y = yMatch ? yMatch[1] : null;
+
+    console.log(x, y);
+
+    if (x === null || y === null) return null;
+
+    function evaluateInside(expr: string) {
+      const numbers = expr.match(/[+-]\d+/g);
+
+      if (!numbers) return 0;
+      return numbers.reduce((sum, num) => sum + parseInt(num), 0);
+    }
+    const centerX = evaluateInside(x);
+    const centerY = evaluateInside(y);
+
+    const radius = Math.sqrt(radiusSquared);
+
+    return (
+      <Plot.Parametric
+        xy={(t) => [
+          -centerX + radius * Math.cos(t),
+          -centerY + radius * Math.sin(t),
+        ]}
+        t={[0, 2 * Math.PI]}
+        color={equationData.color}
+        key={equationData.id}
+      />
+    );
+  }
   if (equation.startsWith("(")) {
     const indexOfOpen = 0;
     const indexOfComma = equation.indexOf(",");
-    const indexOfClose = equation.length - 1;
+    const indexOfClose = equation.indexOf(")");
 
     const x = Number(equation.substring(indexOfOpen + 1, indexOfComma));
     const y = Number(equation.substring(indexOfComma + 1, indexOfClose));
@@ -47,6 +92,18 @@ export function stringToGraph(equationData: EquationValueType) {
       <Point x={x} y={y} color={equationData.color} key={equationData.id} />
     );
   }
+  if (equation.includes("x^2+y^2=") || equation.includes("y^2+x^2=")) {
+    console.log("Circle Detected");
+    const radiusSquared = Number(equation.split("=")[1].trim());
+    return (
+      <Circle
+        key={equationData.id}
+        color={equationData.color}
+        radius={Math.sqrt(radiusSquared)}
+        center={[0, 0]}
+      />
+    );
+  }
 }
 
 export function stringToKatex(equation: string) {
@@ -55,26 +112,62 @@ export function stringToKatex(equation: string) {
 }
 
 export function validateEquation(equation: string) {
-  if (equation.trim() === "") {
+  const expr = equation.replace(/\s/g, "");
+
+  if (expr === "") {
     return { success: false, message: "Enter an equation!" };
   }
 
-  if (equation.includes("{") || equation.includes("}")) {
+  if (expr.includes("{") || expr.includes("}")) {
     return {
       success: false,
       message: "Cannot use { or }, please use ( ) instead",
     };
   }
 
+  let openCount = 0;
+  for (let i = 0; i < expr.length; i++) {
+    const char = expr[i];
+    if (char === "(") openCount++;
+    else if (char === ")") {
+      openCount--;
+      if (openCount < 0) {
+        return { success: false, message: "Invalid parentheses usage!" };
+      }
+    }
+  }
+  if (openCount !== 0) {
+    return { success: false, message: "Invalid parentheses usage!" };
+  }
+
   // Check for trig without parentheses (case-insensitive)
   const trigPattern =
     /\b(sin|cos|tan|csc|sec|cot|asin|acos|atan|sinh|cosh|tanh)\s*[^(]/i;
 
-  if (trigPattern.test(equation)) {
+  if (trigPattern.test(expr)) {
     return {
       success: false,
       message: "Please use parentheses after trig functions, e.g., sin(x)",
     };
+  }
+
+  if (equation.includes("x^2+y^2=") || equation.includes("y^2+x^2=")) {
+    const [left, right] = expr.split("=");
+    const radius = parseFloat(right);
+
+    if (isNaN(radius) || radius <= 0) {
+      return { success: false, message: "Radius must be a positive number!" };
+    }
+    const [term1, term2] = left.split("+").map((t) => t.trim());
+    if (
+      (term1.includes("x") && term1.includes("y")) ||
+      (term2.includes("x") && term2.includes("y"))
+    ) {
+      return {
+        success: false,
+        message: "Complex implicit equation is not supported",
+      };
+    }
   }
 
   return { success: true, message: "" };

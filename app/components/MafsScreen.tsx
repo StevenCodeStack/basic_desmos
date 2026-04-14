@@ -1,5 +1,5 @@
 "use client";
-import { Coordinates, labelPi, Mafs, Plot } from "mafs";
+import { Circle, Coordinates, labelPi, Mafs, Plot } from "mafs";
 import React, { useRef, useEffect, useState } from "react";
 import "mafs/core.css";
 import { stringToGraph } from "../lib/functions";
@@ -21,6 +21,15 @@ const MafsScreen = () => {
         {value.map((e) => stringToGraph(e))}
         {/* {stringToGraph({ equation: "y = (x + 1)/(x-1)", color: "#fff", id: 1 })} */}
         {/* <Plot.OfX y={(x) => Math.pow(x, 5)} /> */}
+        {/* <Circle radius={3} center={[0, 0]} /> */}
+        {/* <Plot.Parametric
+          xy={(t) => [
+            -2 + Math.sqrt(20) * Math.cos(t),
+            2 + Math.sqrt(20) * Math.sin(t),
+          ]}
+          t={[0, 2 * Math.PI]}
+          color="blue"
+        /> */}
       </Mafs>
     </div>
   );
