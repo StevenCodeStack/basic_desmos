@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Coda } from "next/font/google";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 
 const coda = Coda({
   variable: "--font-coda",
@@ -8,6 +9,7 @@ const coda = Coda({
   weight: "400",
 });
 import { ValueProvider } from "@/hooks/valueContext";
+import { Bounce, ToastContainer } from "react-toastify";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -23,6 +25,19 @@ export default function RootLayout({
     <html lang="en" className={coda.variable}>
       <body className="min-h-full flex flex-col">
         <ValueProvider>{children}</ValueProvider>
+        <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick={false}
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+          transition={Bounce}
+        />
       </body>
     </html>
   );

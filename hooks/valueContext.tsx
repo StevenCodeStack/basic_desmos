@@ -1,13 +1,14 @@
 "use client";
+import { EquationValueType } from "@/types";
 import { createContext, useState, useContext } from "react";
 
 const ValueContext = createContext<{
-  value: string;
-  setValue: (v: string) => void;
+  value: EquationValueType[];
+  setValue: (v: EquationValueType[]) => void;
 } | null>(null);
 
 export function ValueProvider({ children }: { children: React.ReactNode }) {
-  const [value, setValue] = useState("asd");
+  const [value, setValue] = useState<EquationValueType[]>([]);
   return (
     <ValueContext.Provider value={{ value, setValue }}>
       {children}
