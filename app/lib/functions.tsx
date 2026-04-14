@@ -1,12 +1,13 @@
 /**
  * function => y = x, x = y
  * point => (x,y)
- *
+ * trig functions
  */
 import * as math from "mathjs";
 
 import { Plot, Point } from "mafs";
 import { EquationValueType } from "@/types";
+import { InlineMath } from "react-katex";
 
 export function stringToGraph(equationData: EquationValueType) {
   const equation = equationData.equation.trim().replace(" ", "");
@@ -46,4 +47,35 @@ export function stringToGraph(equationData: EquationValueType) {
       <Point x={x} y={y} color={equationData.color} key={equationData.id} />
     );
   }
+}
+
+export function stringToKatex(equation: string) {
+  const expr = equation.replace(/\^\(([^)]+)\)/g, "^{$1}");
+  return <InlineMath>{String(expr)}</InlineMath>;
+}
+
+export function validateEquation(equation: string) {
+  if (equation.trim() === "") {
+    return { success: false, message: "Enter an equation!" };
+  }
+
+  if (equation.includes("{") || equation.includes("}")) {
+    return {
+      success: false,
+      message: "Cannot use { or }, please use ( ) instead",
+    };
+  }
+
+  // Check for trig without parentheses (case-insensitive)
+  const trigPattern =
+    /\b(sin|cos|tan|csc|sec|cot|asin|acos|atan|sinh|cosh|tanh)\s*[^(]/i;
+
+  if (trigPattern.test(equation)) {
+    return {
+      success: false,
+      message: "Please use parentheses after trig functions, e.g., sin(x)",
+    };
+  }
+
+  return { success: true, message: "" };
 }

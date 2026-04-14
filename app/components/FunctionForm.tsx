@@ -4,6 +4,7 @@ import { useValue } from "@/hooks/valueContext";
 import React, { FormEvent, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { toast } from "react-toastify";
+import { validateEquation } from "../lib/functions";
 const FunctionForm = () => {
   const [color, setColor] = useState("#fff");
   const [equation, setEquation] = useState("");
@@ -11,9 +12,9 @@ const FunctionForm = () => {
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
-    if (equation.trim() === "") return toast.error("Enter an equation!");
-    if (equation.includes("{") || equation.includes("}"))
-      return toast.error("Cannot use {}, please use ()");
+    const response = validateEquation(equation);
+    if (!response.success) return toast.error(response.message);
+
     setValue([...value, { id: Date.now(), equation, color }]);
     setEquation("");
   }

@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import { useValue } from "@/hooks/valueContext";
 import { EquationValueType } from "@/types";
+import { stringToKatex } from "../lib/functions";
 const FunctionList = () => {
   const { value } = useValue();
   return (
@@ -28,7 +29,7 @@ const FunctionItem = ({
         {index + 1}
       </div>
       <div className="grow flex items-center pl-4 gap-5">
-        {equationValue.equation}
+        {stringToKatex(equationValue.equation)}
         <div
           className={`rounded-4xl h-4 w-4 `}
           style={{ backgroundColor: equationValue.color }}

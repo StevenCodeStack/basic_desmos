@@ -2,7 +2,7 @@
 import { Coordinates, labelPi, Mafs, Plot } from "mafs";
 import React, { useRef, useEffect, useState } from "react";
 import "mafs/core.css";
-import { stringToGraph } from "../lib/stringToGraph";
+import { stringToGraph } from "../lib/functions";
 import { useValue } from "@/hooks/valueContext";
 
 const MafsScreen = () => {
