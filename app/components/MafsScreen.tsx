@@ -46,10 +46,12 @@ const MafsScreen = () => {
         {value.map((e) => (
           <ErrorBoundary
             FallbackComponent={ErrorFallback}
-            resetKeys={[value]}
+            resetKeys={[e.equation]}
             key={e.id}
             onError={() => {
-              toast.error("Equation is unrecognizable or unsupported");
+              toast.error("Equation is unrecognizable or unsupported", {
+                toastId: "toast-equation-error",
+              });
             }}
           >
             {stringToGraph(e)}

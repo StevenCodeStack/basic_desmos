@@ -4,7 +4,7 @@ import { useValue } from "@/hooks/valueContext";
 import React, { FormEvent, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { toast } from "react-toastify";
-import { validateEquation } from "../lib/functions";
+import { hasNonMathChars, validateEquation } from "../lib/functions";
 const FunctionForm = () => {
   const [color, setColor] = useState("#fff");
   const [equation, setEquation] = useState("");
@@ -16,6 +16,9 @@ const FunctionForm = () => {
       !/^#?([a-fA-F0-9]{3}|[a-fA-F0-9]{6}|[a-fA-F0-9]{8})$/.test(color.trim())
     ) {
       return toast.error("Invalid Hex Color");
+    }
+    if (hasNonMathChars(equation)) {
+      return toast.error("Equation contains invalid characters!");
     }
     const response = validateEquation(equation);
     if (!response.success) return toast.error(response.message);

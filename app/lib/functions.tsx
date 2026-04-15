@@ -217,3 +217,29 @@ export function validateEquation(equation: string) {
 
   return { success: true, message: "" };
 }
+
+const nonMathSpecialChars = [
+  "@",
+  "#",
+  "$",
+  "&",
+  "|",
+  "\\",
+  "`",
+  "~",
+  '"',
+  "'",
+  ";",
+  ":",
+  "?",
+  "©",
+  "®",
+  "™",
+  "€",
+  "£",
+  "¥",
+];
+
+export const hasNonMathChars = (str: string): boolean => {
+  return nonMathSpecialChars.some((char) => str.includes(char));
+};
