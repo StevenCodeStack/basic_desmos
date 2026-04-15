@@ -106,7 +106,7 @@ export function stringToGraph(equationData: EquationValueType) {
       );
     }
   } catch (error) {
-    console.error("break");
+    console.error("error" + error);
   }
 }
 

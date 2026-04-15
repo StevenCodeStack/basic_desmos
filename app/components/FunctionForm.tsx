@@ -12,16 +12,21 @@ const FunctionForm = () => {
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
+    if (
+      !/^#?([a-fA-F0-9]{3}|[a-fA-F0-9]{6}|[a-fA-F0-9]{8})$/.test(color.trim())
+    ) {
+      return toast.error("Invalid Hex Color");
+    }
     const response = validateEquation(equation);
     if (!response.success) return toast.error(response.message);
 
-    setValue([...value, { id: Date.now(), equation, color }]);
+    setValue([{ id: Date.now(), equation, color }, ...value]);
     setEquation("");
   }
 
   return (
     <div className="mx-5 mb-10">
-      <form action="" onSubmit={onSubmit}>
+      <form action="" onSubmit={onSubmit} className="flex flex-col">
         <p>Function</p>
         <input
           value={equation}
@@ -38,7 +43,13 @@ const FunctionForm = () => {
             }}
           />
         </div>
-        <button className="px-5 py-2 border border-gray-300 rounded-lg">
+        <input
+          value={color}
+          onChange={(e) => setColor(e.target.value)}
+          placeholder="Enter a hex color"
+          className="border border-gray-300 w-60 py-1 px-3 rounded"
+        />
+        <button className="px-5 py-2 w-fit mt-5 border border-gray-300 rounded-lg">
           Submit
         </button>
       </form>
